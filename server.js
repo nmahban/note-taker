@@ -2,14 +2,20 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
-// const db = require("./db/db.json");
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+//middleware// 
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
+
+
+
+//HTML Routes//
 
 app.get("/notes", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "notes.html"));
@@ -17,6 +23,10 @@ app.get("/notes", (req, res) => {
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+
+
+
+//API Routes//
 
 app.get("/api/notes", (req, res) => {
   fs.readFile(path.join(__dirname, "db", "db.json"), "utf8", (err, data) => {
@@ -42,6 +52,8 @@ app.post("/api/notes", (req, res) => {
   });
 });
 
+//Delete Route//
+
 app.delete("/api/notes/:id", (req, res) => {
   const { id } = req.params;
   fs.readFile(path.join(__dirname, "db", "db.json"), "utf8", (err, data) => {
@@ -66,6 +78,8 @@ app.delete("/api/notes/:id", (req, res) => {
     );
   });
 });
+
+//server start//
 
 app.listen(PORT, () => {
   console.log(`Server is listening on http://localhost:${PORT}`);
