@@ -2,6 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
+// const db = require("./db/db.json");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -13,9 +14,8 @@ app.use(express.static("public"));
 app.get("/notes", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "notes.html"));
 });
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "indexl.html"));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 app.get("/api/notes", (req, res) => {
@@ -37,6 +37,31 @@ app.post("/api/notes", (req, res) => {
       (err) => {
         if (err) throw err;
         res.json(newNote);
+      }
+    );
+  });
+});
+
+app.delete("/api/notes/:id", (req, res) => {
+  const { id } = req.params;
+  fs.readFile(path.join(__dirname, "db", "db.json"), "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading db.json:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    let notes = JSON.parse(data);
+    const filteredNotes = notes.filter((note) => note.id !== id);
+
+    fs.writeFile(
+      path.join(__dirname, "db", "db.json"),
+      JSON.stringify(filteredNotes, null, 2),
+      (err) => {
+        if (err) {
+          console.error("Error writing to db.json:", err);
+          return res.status(500).json({ error: "Internal Server Error" });
+        }
+        res.status(200).json({ message: "Note deleted" });
       }
     );
   });
